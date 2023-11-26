@@ -15,7 +15,7 @@ This project is an inventory management system API developed using Django Rest F
 
 - **Payment Gateway Integration (M-PESA)**: We aim to integrate M-PESA as a payment gateway. This will facilitate seamless sales transactions within the system, making it more efficient for users in regions where M-PESA is a popular payment method.
 
-- **Contributing**: Contributions are welcome, especially from individuals with experience in Django Rest Framework, authentication, authorization, and payment systems like M-PESA. If you're interested in contributing to these areas, please reach out to me via Twitter ([https://twitter.com/MungaiMbuthi]) for collaboration.
+- **Contributing**: Contributions are welcome, especially from individuals with experience in Django Rest Framework, authentication, authorization, and payment systems like M-PESA. If you're interested in contributing to these areas, please reach out to me via Twitter([https://twitter.com/MungaiMbuthi]) for collaboration.
 
 ## Installation
 

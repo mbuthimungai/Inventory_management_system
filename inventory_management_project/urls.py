@@ -21,7 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include([
         path('categories/', include('category_management.urls')),
-        path("items/", include("item_management.urls"))
+        path("items/", include("item_management.urls")),
+        path("stock/", include("stock_management.urls"))
         # Include other app's URL configurations here, e.g.,
         # path('items/', include('item_management.urls')),
     ])),    

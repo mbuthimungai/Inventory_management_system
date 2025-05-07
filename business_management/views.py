@@ -13,28 +13,39 @@ from rest_framework.authentication import TokenAuthentication
 def business_view(request):
     user = request.user
     userSerializer = UserSerializer(instance=user)
+
     if request.method == "GET":
         pk = request.query_params.get("pk")
+
+        if user.user_type == user.UserType.CLIENT:
+            business_qs = Business.objects.filter(owner=user)
+        elif user.user_type == user.UserType.WORKER:
+            if not hasattr(user, "business") or not user.business:
+                return Response({"error": "Worker has no associated business."}, status=403)
+            business_qs = Business.objects.filter(pk=user.business.pk)
+        else:  # SUPERADMIN u otro tipo
+            business_qs = Business.objects.all()
+
         if pk:
             try:
-                business = Business.objects.get(pk=pk, owner=user)
+                business = business_qs.get(pk=pk)
                 serializer = BusinessSerializer(business)
                 return Response(serializer.data)
             except Business.DoesNotExist:
                 return Response({"error": "Business not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            businesses = Business.objects.filter(owner=user)
-            serializer = BusinessSerializer(businesses, many=True)
+            serializer = BusinessSerializer(business_qs, many=True)
             return Response(serializer.data)
 
     elif request.method == "POST":
-        serializer = BusinessCreateSerializer(data=request.data)
+        if user.user_type == user.UserType.WORKER:
+            return Response({"error": "Workers cannot create businesses."}, status=403)
 
+        serializer = BusinessCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=user)
             return Response({
-                "data":serializer.data,
-                "user":userSerializer.data,
-                }, status=status.HTTP_201_CREATED)
+                "data": serializer.data,
+                "user": userSerializer.data,
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

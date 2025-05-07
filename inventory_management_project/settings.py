@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'stock_management',
     'supplier_management',
     'transaction_management',
-    'business_management',\
+    'business_management',
     'auth_management',
     'rest_framework.authtoken',
     

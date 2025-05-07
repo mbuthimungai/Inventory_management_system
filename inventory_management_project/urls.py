@@ -25,6 +25,7 @@ urlpatterns = [
         path("suppliers/", include("supplier_management.urls")),
         path("transactions/", include("transaction_management.urls")),
         path("users/", include("auth_management.urls")),
+        path("business/", include("business_management.urls")),
         # Include other app's URL configurations here, e.g.,
         # path('items/', include('item_management.urls')),
     ])),

@@ -25,30 +25,36 @@ def login_view(request):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def register_view(request):
-    serializer = serializers.RegisterSerializer(data=request.data)
+    requesting_user = request.user
+    data = request.data.copy()
+
+    # Restricciones por tipo de usuario que hace la solicitud
+    if requesting_user.user_type == User.UserType.WORKER:
+        return Response({"error": "Workers cannot register new users."}, status=403)
+
+    if requesting_user.user_type == User.UserType.CLIENT:
+        # Forzar que el nuevo usuario sea WORKER
+        if data.get("user_type") != User.UserType.WORKER:
+            return Response({"error": "Clients can only register workers."}, status=403)
+
+        # Forzar que el nuevo WORKER esté asociado al CLIENT que lo crea
+        data["client"] = requesting_user.id
+
+    serializer = serializers.RegisterSerializer(data=data)
     if not serializer.is_valid():
         return Response({"error": serializer.errors}, status=400)
-    
-    # Aquí puedes manejar la lógica de registro, como crear un nuevo usuario
-    # user = User.objects.create_user(username=serializer.validated_data['username'], password=serializer.validated_data['password'])
-    serializer.create(serializer.validated_data)
-    
-    try:
-        # Aquí puedes manejar la lógica de registro, como crear un nuevo usuario
-        user = User.objects.get(username=serializer.validated_data['username'])
-        user.set_password(serializer.validated_data['password'])
-        user.save()
-        
-        token = Token.objects.create(user=user)
-        
-        return Response({
-            "message": "User registered successfully!",
-            "token": token.key
-        }, status=201)
-        
-    except Exception as e:
-        return Response({"errorUser": str(e)}, status=400)
+
+    user = serializer.save()
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({
+        "message": "User registered successfully!",
+        "token": token.key,
+        "user": serializers.UserSerializer(user).data
+    }, status=201)
+
 
 
 @api_view(['GET'])
